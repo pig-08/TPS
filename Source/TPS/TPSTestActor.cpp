@@ -37,7 +37,6 @@ void ATPSTestActor::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
 // Called every frame
 void ATPSTestActor::Tick(float DeltaTime)
 {

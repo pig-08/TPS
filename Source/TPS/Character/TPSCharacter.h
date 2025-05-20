@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "TPSCharacter.generated.h"
 
+struct FInputActionValue;
+
 UCLASS()
 class TPS_API ATPSCharacter : public ACharacter
 {
@@ -32,4 +34,24 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<class  UCameraComponent> Camera;
+
+#pragma region InputSystem
+public:
+	void Input_Move(const FInputActionValue& InpuValue);
+	void Input_Turn(const FInputActionValue& InpuValue);
+	
+protected:
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputMappingContext> IMCDefault;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> TurnAction;
+#pragma endregion
+
 };

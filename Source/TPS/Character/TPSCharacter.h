@@ -39,6 +39,8 @@ protected:
 public:
 	void Input_Move(const FInputActionValue& InpuValue);
 	void Input_Turn(const FInputActionValue& InpuValue);
+	void Input_Run(const FInputActionValue& InpuValue);
+	void Input_Fire(const FInputActionValue& InpuValue);
 	
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -52,6 +54,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> TurnAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> RunAction;
+
+	UPROPERTY(EditAnywhere, Category = Input)
+	TObjectPtr<class UInputAction> FireAction;
 #pragma endregion
 
 };

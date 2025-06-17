@@ -211,15 +211,21 @@ void ATPSCharacter::Input_Fire(const FInputActionValue& InpuValue)
 	if (AnimInstance == nullptr)
 		return;
 
+	if (EquipWeapon == nullptr)
+		return;
+
 	bool bFireStart = InpuValue.Get<bool>();
 
-	if (bFireStart)
+	if (bFireStart && EquipWeapon->GetAmmoRemainCount() > 0)
 	{
 		AnimInstance->PlayFireMontage();
+		EquipWeapon->StartFire(this);
 	}
 	else
 	{
 		AnimInstance->StopAllMontages(false);
+
+		EquipWeapon->StopFire();
 	}
 }
 

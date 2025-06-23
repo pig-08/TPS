@@ -14,6 +14,12 @@ UTPS_AnimInstance::UTPS_AnimInstance()
 	{
 		FireMontage = FireMontageRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ReloadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Animation/AM_Reload.AM_Reload'"));
+	if (ReloadMontageRef.Succeeded())
+	{
+		ReloadMontage = ReloadMontageRef.Object;
+	}
 }
 
 void UTPS_AnimInstance::NativeInitializeAnimation()
@@ -52,4 +58,18 @@ void UTPS_AnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UTPS_AnimInstance::PlayFireMontage()
 {
 	Montage_Play(FireMontage);
+}
+
+void UTPS_AnimInstance::PlayReloadMontage()
+{
+	Montage_Play(ReloadMontage);
+	Montage_GetEndedDelegate(ReloadMontage)->BindUObject(this, &UTPS_AnimInstance::FinishReloading);
+}
+
+void UTPS_AnimInstance::FinishReloading(UAnimMontage*, bool)
+{
+	if (Character)
+	{
+		Character->FinishReloading();
+	}
 }

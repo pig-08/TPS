@@ -4,6 +4,8 @@
 #include "Weapon/Weapon.h"
 #include "Character/TPSCharacter.h"
 #include "Weapon/Bullet.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -19,6 +21,14 @@ AWeapon::AWeapon()
 	if (MeshRef.Succeeded())
 	{
 		MeshCompnoent->SetSkeletalMesh(MeshRef.Object);
+	}
+
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> HitEffectRef(TEXT("/Script/Engine.ParticleSystem'/Game/_Art/Effect/P_HitEffect.P_HitEffect'"));
+
+	if (HitEffectRef.Succeeded())
+	{
+		HitEffect = HitEffectRef.Object;
 	}
 
 	FireType = EFireType::EF_LineTrace;
@@ -76,10 +86,29 @@ void AWeapon::StopFire()
 
 void AWeapon::Reloaing()
 {
+	if (MeshCompnoent)
+	{
+		MeshCompnoent->HideBoneByName(FName("b_gun_mag"), EPhysBodyOp::PBO_None);
+	}
 }
 
 void AWeapon::FinishReloading()
 {
+	if (MeshCompnoent)
+	{
+		MeshCompnoent->UnHideBoneByName(FName("b_gun_mag"));
+	}
+
+	SetAmmoRemainCount(AmmoMaxCount);
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Magenta, TEXT("FinishReloading"));
+
+
+}
+
+void AWeapon::PlayHitEffect(FTransform HitTransform)
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitTransform);
 }
 
 void AWeapon::FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter)
@@ -118,6 +147,14 @@ void AWeapon::FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerCharac
 
 		SetAmmoRemainCount(--AmmoRemainCount);
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, FString::Printf(TEXT("Ammmo Remain Cout :: %d"), GetAmmoRemainCount()));
+		
+		if (GetAmmoRemainCount() <= 0)
+		{
+			Character->StopAnimMontage(Character->GetCurrentMontage());
+			StopFire();
+			Character->StartReloading();
+		}
+	
 	}
 }
 
@@ -149,11 +186,24 @@ void AWeapon::FireWithLineTeace(TWeakObjectPtr<class ATPSCharacter> OwnerCharact
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan, TEXT("LIneTraceHit"));
 		}
+		
+		FTransform BullectTransform;
+		BullectTransform.SetLocation(HitResult.ImpactPoint);
+
+		PlayHitEffect(BullectTransform);
 	}
 
 	SetAmmoRemainCount(--AmmoRemainCount);
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan, FString::Printf(TEXT("Ammo Remain Cout : %d"), GetAmmoRemainCount()));
+
+
+	if (GetAmmoRemainCount() <= 0)
+	{
+		Character->StopAnimMontage(Character->GetCurrentMontage());
+		StopFire();
+		Character->StartReloading();
+	}
 
 #if ENABLE_DRAW_DEBUG
 	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;

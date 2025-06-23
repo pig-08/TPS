@@ -99,6 +99,14 @@ ATPSCharacter::ATPSCharacter()
 	{
 		FireAction = FireActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ReloadActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Reload.IA_Reload'"));
+
+	if (ReloadActionRef.Succeeded())
+	{
+		ReloadAction = ReloadActionRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -154,6 +162,7 @@ void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Run);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Fire);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Reload);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Turn);
 	}
@@ -175,6 +184,37 @@ void ATPSCharacter::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
 			WeapotSocket->AttachActor(EquipWeapon, GetMesh());
 		}
 	}
+}
+
+void ATPSCharacter::StartReloading()
+{
+	UTPS_AnimInstance* AnimInstance = Cast<UTPS_AnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance == nullptr)
+		return;
+
+	if (EquipWeapon == nullptr)
+		return;
+
+	AnimInstance->PlayReloadMontage();
+
+	bIsReload = true;
+	EquipWeapon->StopFire();
+	EquipWeapon->Reloaing();
+
+}
+
+void ATPSCharacter::FinishReloading()
+{
+	UTPS_AnimInstance* AnimInstance = Cast<UTPS_AnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance == nullptr)
+		return;
+
+	if (EquipWeapon == nullptr)
+		return;
+
+	AnimInstance->StopAllMontages(false);
+	bIsReload = false;
+	EquipWeapon->FinishReloading();
 }
 
 void ATPSCharacter::Input_Move(const FInputActionValue& InpuValue)
@@ -206,6 +246,9 @@ void ATPSCharacter::Input_Run(const FInputActionValue& InpuValue)
 
 void ATPSCharacter::Input_Fire(const FInputActionValue& InpuValue)
 {
+	if (bIsReload)
+		return;
+
 	UTPS_AnimInstance* AnimInstance = Cast<UTPS_AnimInstance>(GetMesh()->GetAnimInstance());
 
 	if (AnimInstance == nullptr)
@@ -227,5 +270,13 @@ void ATPSCharacter::Input_Fire(const FInputActionValue& InpuValue)
 
 		EquipWeapon->StopFire();
 	}
+}
+
+void ATPSCharacter::Input_Reload(const FInputActionValue& InpuValue)
+{
+	if (bIsReload)
+		return;
+
+	StartReloading();
 }
 

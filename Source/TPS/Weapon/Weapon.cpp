@@ -6,6 +6,7 @@
 #include "Weapon/Bullet.h"
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -137,6 +138,7 @@ void AWeapon::FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerCharac
 
 	if (SpawnBullet)
 	{
+		SpawnBullet->SetAttackDamage(AttackDamage);
 		SpawnBullet->SetActorLocation(FireTransform.GetLocation());
 		SpawnBullet->SetActorRotation(FireTransform.GetRotation());
 
@@ -182,9 +184,13 @@ void AWeapon::FireWithLineTeace(TWeakObjectPtr<class ATPSCharacter> OwnerCharact
 
 	if (HitDetected)
 	{
-		if (HitResult.GetActor())
+		ACharacter* HitCharacter = Cast<ACharacter>(HitResult.GetActor());
+		if (HitCharacter)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan, TEXT("LIneTraceHit"));
+
+			FDamageEvent DamageEvent;
+			HitCharacter->TakeDamage(AttackDamage, DamageEvent, Character->GetController(), Character);
 		}
 		
 		FTransform BullectTransform;

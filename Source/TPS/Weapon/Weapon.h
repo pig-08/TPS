@@ -73,6 +73,9 @@ protected:
 	float FireInterval = 0.1f;
 
 	UPROPERTY(EditAnywhere, Category = Properties)
+	float AttackDamage = 30.0f;
+
+	UPROPERTY(EditAnywhere, Category = Properties)
 	EFireType FireType = EFireType::EF_Projectile;
 
 private:

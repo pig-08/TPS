@@ -25,5 +25,17 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+public:
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+public:
+	void SetHp(float NewHp);
+	void Hit();
+	void Dead();
 
+protected:
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+	float CurrentHp = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+	float MaxHp = 100.0f;
 };

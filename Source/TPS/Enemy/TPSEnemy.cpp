@@ -3,12 +3,16 @@
 
 #include "Enemy/TPSEnemy.h"
 #include "Animation/EnemyAnimInstance.h"
+#include "AI/EnemyAiController.h"
 
 // Sets default values
 ATPSEnemy::ATPSEnemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	AIControllerClass = AEnemyAiController::StaticClass();
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/_Art/Enemy/Model/vampire_a_lusth.vampire_a_lusth'"));
 
